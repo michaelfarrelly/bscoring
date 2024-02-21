@@ -34,8 +34,17 @@ export function isSpare(frame: Frame): boolean {
   return frame.shots.length > 1 && getFrameScore(frame) === 10;
 }
 
+export function lastShots(frames: Frame[], num: number = 3): number[] {
+  const maxIndex = frames.length - 1;
+  const x = frames.reduceRight((prev, curr) => {
+    return [...curr.shots, ...prev];
+  }, [] as number[]);
+
+  return x.slice(-num);
+}
+
 export class Game {
-  frame: number = 0;
+  frameNumber: number = 1; // starting at 1.
   // shot: number = 0;
   scoreByFrame: Frame[] = [
     {
@@ -49,77 +58,126 @@ export class Game {
    * @param pins number of pings knocked over.
    */
   roll(pins: number): void {
-    const currentFrame = this.scoreByFrame[this.frame];
-    const currentShot = this.scoreByFrame[this.frame].shots.length;
+    const currentFrameIndex = this.frameNumber - 1;
+    const currentFrame = this.scoreByFrame[currentFrameIndex];
+    const currentShot = this.scoreByFrame[currentFrameIndex].shots.length + 1; // 1-base numbers
     currentFrame.shots.push(pins);
     console.log(
-      `${this.frame}/${currentShot}: [${currentFrame.shots.join(",")}]`
+      `${this.frameNumber}/${currentShot}: [${currentFrame.shots.join(",")}]`
     );
 
-    // when previous frame is a a strike, add pins to its bonus
-    if (this.frame > 0 && isStrike(this.scoreByFrame[this.frame - 1])) {
+    // when previous frame is a strike, add pins to its bonus
+    if (
+      this.frameNumber > 1 &&
+      (this.frameNumber < 10 || (this.frameNumber == 10 && currentShot == 1)) &&
+      isStrike(this.scoreByFrame[currentFrameIndex - 1])
+    ) {
       // previous frame was a strike
       // console.log(`${this.frame}: prev was strike`);
-      this.scoreByFrame[this.frame - 1].bonus += pins;
+      console.log(
+        `${this.frameNumber}/${currentShot}/bonus to ${
+          currentFrameIndex - 1
+        }: ${pins}`
+      );
+      this.scoreByFrame[currentFrameIndex - 1].bonus += pins;
     }
 
-    // TODO check the previous shots, not just frame status.
+    // when 2-previous frame was a strike, add pins to bonus.
     if (
-      this.frame > 1 &&
-      isStrike(this.scoreByFrame[this.frame - 2]) &&
-      isStrike(this.scoreByFrame[this.frame - 1])
+      this.frameNumber > 2 &&
+      this.frameNumber < 10 &&
+      isStrike(this.scoreByFrame[currentFrameIndex - 2]) &&
+      isStrike(this.scoreByFrame[currentFrameIndex - 1])
     ) {
       // console.log(`${this.frame}: prev 2x was strike`);
-      this.scoreByFrame[this.frame - 2].bonus += pins;
+      console.log(
+        `${this.frameNumber}/${currentShot}/bonus to ${
+          currentFrameIndex - 2
+        }: ${pins}`
+      );
+      this.scoreByFrame[currentFrameIndex - 2].bonus += pins;
+    }
+    if (
+      this.frameNumber == 10 &&
+      currentShot == 1 &&
+      isStrike(this.scoreByFrame[currentFrameIndex - 2]) &&
+      isStrike(this.scoreByFrame[currentFrameIndex - 1])
+    ) {
+      console.log(
+        `${this.frameNumber}/${currentShot}/10 bonus to ${
+          currentFrameIndex - 2
+        }: ${pins}`
+      );
+      this.scoreByFrame[currentFrameIndex - 2].bonus += pins;
+    }
+    if (
+      this.frameNumber == 10 &&
+      currentShot == 2 &&
+      isStrike(this.scoreByFrame[currentFrameIndex - 1])
+    ) {
+      console.log(
+        `${this.frameNumber}/${currentShot}/10 bonus to ${currentFrameIndex}: ${pins}`
+      );
+      this.scoreByFrame[currentFrameIndex].bonus += pins;
+    }
+    if (
+      this.frameNumber == 10 &&
+      currentShot == 3 &&
+      this.scoreByFrame[currentFrameIndex].shots[0] == 10
+    ) {
+      console.log(
+        `${this.frameNumber}/${currentShot}/10 bonus to ${currentFrameIndex}: ${pins}`
+      );
+      this.scoreByFrame[currentFrameIndex].bonus += pins;
     }
 
     if (
-      this.frame > 0 &&
-      currentShot == 0 &&
-      isSpare(this.scoreByFrame[this.frame - 1])
+      this.frameNumber > 1 &&
+      currentShot == 1 &&
+      isSpare(this.scoreByFrame[currentFrameIndex - 1])
     ) {
       // previous frame was a spare
-      this.scoreByFrame[this.frame - 1].bonus += pins;
+      console.log(
+        `${this.frameNumber}/${currentShot}/bonus to ${
+          currentFrameIndex - 1
+        }: ${pins}`
+      );
+      this.scoreByFrame[currentFrameIndex - 1].bonus += pins;
     }
 
-    // strike
-    if (isStrike(this.scoreByFrame[this.frame])) {
-      // this.scoreByFrame[this.frame].isStrike = true;
-      // set score
-      // this.scoreByFrame[this.frame].score = 10;
-      this.advanceFrame();
-      return;
-    }
-
-    // spare
+    // user rolls a strike
     if (
       currentShot == 1 &&
-      this.frame < 10 &&
-      isSpare(this.scoreByFrame[this.frame])
+      this.frameNumber < 10 &&
+      isStrike(this.scoreByFrame[currentFrameIndex])
     ) {
-      //   this.scoreByFrame[this.frame].isSpare = true;
-      // set score of the frame.
-      // this.scoreByFrame[this.frame].score = getFrameScore(
-      //   this.scoreByFrame[this.frame]
-      // );
+      this.advanceFrame();
+      return;
+    }
+
+    // user rolls a spare
+    if (
+      currentShot == 2 &&
+      this.frameNumber < 10 &&
+      isSpare(this.scoreByFrame[currentFrameIndex])
+    ) {
       this.advanceFrame();
       return;
     }
     if (
-      this.frame == 10 &&
-      getFrameScore(this.scoreByFrame[this.frame]) === 10
+      this.frameNumber == 10 &&
+      getFrameScore(this.scoreByFrame[currentFrameIndex]) === 10
     ) {
-      // this.scoreByFrame[this.frame].bonus += pins;
-      // set score of the frame.
-      // this.scoreByFrame[this.frame].score = this.scoreByFrame[this.frame].shot1 + (this.scoreByFrame[this.frame].shot2 ?? 0)
-      // this.shot++;
-
+      this.scoreByFrame[this.frameNumber - 1].score = getFrameScore(
+        this.scoreByFrame[this.frameNumber - 1]
+      );
+      console.log(`allow more shots`);
       // allow more shots
       return;
     }
 
-    // normally only allow 2 shots
-    if (currentShot == 1) {
+    // normally only allow 2 shots except on frame 10.
+    if (this.frameNumber != 10 && currentShot == 2) {
       this.advanceFrame();
     }
   }
@@ -127,11 +185,11 @@ export class Game {
   advanceFrame(): void {
     console.log(`advance frame`);
     // write the score
-    this.scoreByFrame[this.frame].score = getFrameScore(
-      this.scoreByFrame[this.frame]
+    this.scoreByFrame[this.frameNumber - 1].score = getFrameScore(
+      this.scoreByFrame[this.frameNumber - 1]
     );
 
-    this.frame++;
+    this.frameNumber++;
     this.scoreByFrame.push({
       shots: [],
       score: 0,
