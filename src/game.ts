@@ -35,9 +35,26 @@ export class Game {
       this.frameNumber > 2 &&
       this.frameNumber < 10 &&
       isStrike(twoPrevFrame) &&
+      currentRoll == 1 &&
       isStrike(prevFrame)
     ) {
+      // if (pins == 4) {
+      //   console.log(
+      //     `${this.frameNumber}:${pins}`,
+      //     twoPrevFrame,
+      //     prevFrame,
+      //     currentFrame
+      //   );
+      // }
       twoPrevFrame.bonus += pins;
+      // if (pins == 4) {
+      //   console.log(
+      //     `${this.frameNumber}:${pins}`,
+      //     twoPrevFrame,
+      //     prevFrame,
+      //     currentFrame
+      //   );
+      // }
     }
     // conditions of the last frame
     if (this.frameNumber == 10) {
@@ -58,7 +75,7 @@ export class Game {
 
     if (
       this.frameNumber > 1 &&
-      this.frameNumber < 10 &&
+      this.frameNumber <= 10 &&
       currentRoll == 1 &&
       isSpare(prevFrame)
     ) {
@@ -75,12 +92,11 @@ export class Game {
         this.advanceFrame();
         return;
       } else if (currentRoll == 2) {
-        // normally only allow 2 shots except on frame 10.
+        // normally only allow 2 rolls except on frame 10.
         this.advanceFrame();
       }
     } else if (
       this.frameNumber == 10 &&
-      // currentFrame.shots.length <= 2 &&
       // strike or spare
       (isStrike(currentFrame) || isSpare(currentFrame)) &&
       getFrameScore(currentFrame) === 10
@@ -126,10 +142,10 @@ interface Frame {
 }
 
 /**
- * Get the shot values
+ * Get the roll values
  */
 export function getFrameScore(frame: Frame): number {
-  // sum up the frame's shots
+  // sum up the frame's rolls
   return frame.rolls.reduce((prev, curr) => {
     return prev + curr;
   }, 0);
@@ -137,8 +153,8 @@ export function getFrameScore(frame: Frame): number {
 
 /**
  * Test if the frame is a Strike
- * - only 1 shot
- * - first shot is 10 pins.
+ * - at least 1 roll (frame 10 can have more than 1 roll)
+ * - first roll is 10.
  */
 export function isStrike(frame: Frame): boolean {
   return frame.rolls.length >= 1 && frame.rolls[0] === 10;
@@ -147,7 +163,7 @@ export function isStrike(frame: Frame): boolean {
 /**
  * Test if the frame is a Spare
  * - only 2 shot
- * - sum of shots is 10 pins.
+ * - sum of rolls is 10
  */
 export function isSpare(frame: Frame): boolean {
   return (
