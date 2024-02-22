@@ -1,6 +1,5 @@
 export class Game {
-  frameNumber: number = 1; // starting at 1.
-  // shot: number = 0;
+  private frameNumber: number = 1; // starting at 1
   scoreByFrame: Frame[] = [
     {
       rolls: [],
@@ -10,7 +9,10 @@ export class Game {
   ];
 
   /**
-   * @param pins number of pings knocked over.
+   * Set the number of pins knocked, and adjust frame
+   * when conditions for strike, spare, or open frame are met.
+   *
+   * @param pins number of pins knocked over.
    */
   roll(pins: number): void {
     const currentFrameIndex = this.frameNumber - 1;
@@ -70,11 +72,9 @@ export class Game {
       // user rolls a strike
       if (isStrike(currentFrame)) {
         this.advanceFrame();
-        return;
       } else if (isSpare(currentFrame)) {
         // user rolls a spare
         this.advanceFrame();
-        return;
       } else if (currentRoll == 2) {
         // normally only allow 2 rolls except on frame 10.
         this.advanceFrame();
@@ -90,11 +90,11 @@ export class Game {
     }
   }
 
-  getCurrentFrame(): Frame {
+  private getCurrentFrame(): Frame {
     return this.scoreByFrame[this.frameNumber - 1];
   }
 
-  advanceFrame(): void {
+  private advanceFrame(): void {
     // write the score for current frame
     this.getCurrentFrame().score = getFrameScore(this.getCurrentFrame());
 
