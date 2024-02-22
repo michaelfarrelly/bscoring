@@ -38,23 +38,7 @@ export class Game {
       currentRoll == 1 &&
       isStrike(prevFrame)
     ) {
-      // if (pins == 4) {
-      //   console.log(
-      //     `${this.frameNumber}:${pins}`,
-      //     twoPrevFrame,
-      //     prevFrame,
-      //     currentFrame
-      //   );
-      // }
       twoPrevFrame.bonus += pins;
-      // if (pins == 4) {
-      //   console.log(
-      //     `${this.frameNumber}:${pins}`,
-      //     twoPrevFrame,
-      //     prevFrame,
-      //     currentFrame
-      //   );
-      // }
     }
     // conditions of the last frame
     if (this.frameNumber == 10) {

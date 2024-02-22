@@ -201,7 +201,6 @@ describe("utility methods", () => {
     test("short game sums the rolls values", () => {
       let game = new Game();
 
-      // perfect game
       const rolls = [10, 10, 10];
       for (const roll of rolls) {
         game.roll(roll);
@@ -235,7 +234,6 @@ describe("utility methods", () => {
     test("non-strike, non-spare short game", () => {
       let game = new Game();
 
-      // perfect game
       const rolls = [2, 3, 4, 5];
       for (const roll of rolls) {
         game.roll(roll);
