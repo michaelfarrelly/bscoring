@@ -7,6 +7,10 @@ describe("utility methods", () => {
       expect(isSpare({ rolls: [10, 0], score: 10, bonus: 0 })).toBe(true);
       expect(isSpare({ rolls: [2, 8], score: 10, bonus: 0 })).toBe(true);
     });
+    test("two rolls not totalling 10 is not a spare", () => {
+      expect(isSpare({ rolls: [1, 2], score: 3, bonus: 0 })).toBe(false);
+      expect(isSpare({ rolls: [5, 4], score: 9, bonus: 0 })).toBe(false);
+    });
     test("strike is not a spare", () => {
       expect(isSpare({ rolls: [10], score: 10, bonus: 0 })).toBe(false);
     });

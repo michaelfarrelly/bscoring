@@ -69,14 +69,8 @@ export class Game {
     }
 
     if (this.frameNumber < 10) {
-      // user rolls a strike
-      if (isStrike(currentFrame)) {
-        this.advanceFrame();
-      } else if (isSpare(currentFrame)) {
-        // user rolls a spare
-        this.advanceFrame();
-      } else if (currentRoll == 2) {
-        // normally only allow 2 rolls except on frame 10.
+      // user rolls a strike or spare, or just rolls 2 other pin counts
+      if (isStrike(currentFrame) || isSpare(currentFrame) || currentRoll == 2) {
         this.advanceFrame();
       }
     } else if (
