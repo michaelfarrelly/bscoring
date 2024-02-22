@@ -1,4 +1,4 @@
-# interview
+# BScoring
 
 ## Install packages for running or testing
 
