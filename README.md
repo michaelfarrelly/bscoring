@@ -2,7 +2,7 @@
 
 ## Install packages for running or testing
 
-Use git clone to copy the library and `yarn` to install the packages.
+Use git clone to copy the library and `yarn` <https://yarnpkg.com/getting-started/install> to install the packages.
 
 ```sh
 cd c:\Code
